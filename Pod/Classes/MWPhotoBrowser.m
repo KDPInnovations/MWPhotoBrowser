@@ -163,9 +163,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _toolbar = [[UIToolbar alloc] initWithFrame:[self frameForToolbarAtOrientation:self.interfaceOrientation]];
     _toolbar.tintColor = [UIColor whiteColor];
     _toolbar.barTintColor = nil;
-    [_toolbar setBackgroundImage:nil forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
-    [_toolbar setBackgroundImage:nil forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsLandscapePhone];
-    _toolbar.barStyle = UIBarStyleBlackTranslucent;
+    [_toolbar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
+    [_toolbar setBackgroundImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsLandscapePhone];
+    [_toolbar setShadowImage:[UIImage new] forToolbarPosition:UIToolbarPositionAny];
+    //_toolbar.barStyle = UIBarStyleBlackTranslucent;
     _toolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     
     // Toolbar Items
@@ -206,16 +207,33 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     [_recycledPages removeAllObjects];
     
     // Navigation buttons
-    if ([self.navigationController.viewControllers objectAtIndex:0] == self) {
+    if (([self.navigationController.viewControllers objectAtIndex:0] == self)||(1==1)) {
         // We're first on stack so show done button
-        _doneButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.frame = CGRectMake(0, 0, 60, 30);
+        button.layer.borderColor = [UIColor whiteColor].CGColor;
+        button.backgroundColor=[UIColor clearColor];
+        button.layer.borderWidth = 1.0f;
+        button.layer.cornerRadius=5.0f;
+        [button setTitle:NSLocalizedString(@"Done", nil) forState:UIControlStateNormal];
+        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        button.titleLabel.adjustsFontSizeToFitWidth=YES;
+        [button setFont:[UIFont fontWithName:@"Helvetica-Neue" size:14.0f]];
+        
+        [button addTarget:self action:@selector(doneButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    //    button.titleLabel.font=[UIFont fontWithName:@"Helvetica-Neue" size:14.0f];
+        _doneButton=[[UIBarButtonItem alloc] initWithCustomView:button];
+       // [_doneButton setTarget:self];
+       // [_doneButton setAction:@selector(doneButtonPressed:)];
+      //  _doneButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
         // Set appearance
-        [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsLandscapePhone];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsLandscapePhone];
-        [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateNormal];
-        [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateHighlighted];
+        
+      //  [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+      //  [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsLandscapePhone];
+      //  [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
+      //  [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsLandscapePhone];
+      //  [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateNormal];
+      //  [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateHighlighted];
         self.navigationItem.rightBarButtonItem = _doneButton;
     } else {
         // We're not first so show back button
@@ -447,8 +465,12 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     navBar.shadowImage = nil;
     navBar.translucent = YES;
     navBar.barStyle = UIBarStyleBlackTranslucent;
-    [navBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
-    [navBar setBackgroundImage:nil forBarMetrics:UIBarMetricsLandscapePhone];
+    [navBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    [navBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsLandscapePhone];
+    
+    [navBar setShadowImage:[UIImage new]];
+   
+    [self.navigationItem setHidesBackButton:YES];
 }
 
 - (void)storePreviousNavBarAppearance {
@@ -1567,15 +1589,31 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             }
         }
         // Dismiss view controller
-        if ([_delegate respondsToSelector:@selector(photoBrowserDidFinishModalPresentation:)]) {
+        if ([self isModal]){
+            if ([_delegate respondsToSelector:@selector(photoBrowserDidFinishModalPresentation:)]) {
             // Call delegate method and let them dismiss us
-            [_delegate photoBrowserDidFinishModalPresentation:self];
-        } else  {
-            [self dismissViewControllerAnimated:YES completion:nil];
+                [_delegate photoBrowserDidFinishModalPresentation:self];
+            } else  {
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }
+        }
+        else{
+            [self.navigationController popViewControllerAnimated:YES];
+
         }
     }
 }
 
+- (BOOL)isModal {
+    if([self presentingViewController])
+        return YES;
+    if([[[self navigationController] presentingViewController] presentedViewController] == [self navigationController])
+        return YES;
+    if([[[self tabBarController] presentingViewController] isKindOfClass:[UITabBarController class]])
+        return YES;
+    
+    return NO;
+}
 #pragma mark - Actions
 
 - (void)actionButtonPressed:(id)sender {
@@ -1597,7 +1635,22 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             if (photo.caption) {
                 [items addObject:photo.caption];
             }
+            
+            __block UIColor *oldColor=[[UINavigationBar appearance] barTintColor];
+            [[UINavigationBar appearance] setBarTintColor:[UIColor whiteColor]];
+            
             self.activityViewController = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
+            
+            NSArray *excludedActivities = @[UIActivityTypePrint,
+                                            UIActivityTypeOpenInIBooks,UIActivityTypeAddToReadingList,
+                                            UIActivityTypePostToWeibo,
+                                            
+                                            UIActivityTypeAssignToContact,
+                                            UIActivityTypeAddToReadingList,
+                                            UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo,@"com.apple.mobilenotes.SharingExtension",
+                                            @"com.apple.reminders.RemindersEditorExtension",
+                                            ];
+            self.activityViewController.excludedActivityTypes = excludedActivities;
             
             // Show loading spinner after a couple of seconds
             double delayInSeconds = 2.0;
@@ -1611,6 +1664,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             // Show
             typeof(self) __weak weakSelf = self;
             [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
+                [[UINavigationBar appearance] setBarTintColor:oldColor];
                 weakSelf.activityViewController = nil;
                 [weakSelf hideControlsAfterDelay];
                 [weakSelf hideProgressHUD:YES];
@@ -1666,4 +1720,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     self.navigationController.navigationBar.userInteractionEnabled = YES;
 }
 
+
+
+-(BOOL)shouldAutorotate
+{
+    return YES;
+}
 @end
