@@ -52,7 +52,7 @@
     UIBarButtonItem *_previousViewControllerBackButton;
     UIImage *_previousNavigationBarBackgroundImageDefault;
     UIImage *_previousNavigationBarBackgroundImageLandscapePhone;
-    
+    UIDeviceOrientation _previousOrientation;
     // Video
     AVPlayerViewController *_currentVideoPlayerViewController;
     NSUInteger _currentVideoIndex;

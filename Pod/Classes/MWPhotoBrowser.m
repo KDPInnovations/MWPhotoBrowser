@@ -12,6 +12,7 @@
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
+@import LinkPresentation;
 
 #define PADDING                  10
 
@@ -95,6 +96,12 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 - (void)dealloc {
+    
+    [UIView performWithoutAnimation:^{
+        NSNumber *value = [NSNumber numberWithInt:_previousOrientation];
+        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+        
+    }];
     
     [[UIApplication sharedApplication] setStatusBarHidden:self.isStatusBarHidden];
     
@@ -358,6 +365,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 	// Super
 	[super viewWillAppear:animated];
     
+    _previousOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+    
     // Status bar
     if (!_viewHasAppearedInitially) {
         _leaveStatusBarAlone = [self presentingViewControllerPrefersStatusBarHidden];
@@ -399,6 +408,15 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 }
 
+-(void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion{
+    [UIView performWithoutAnimation:^{
+        NSNumber *value = [NSNumber numberWithInt:_previousOrientation];
+        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+    }];
+    
+    [super dismissViewControllerAnimated:flag completion:completion];
+    
+}
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     _viewIsActive = YES;
@@ -1033,7 +1051,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 - (CGRect)frameForToolbarAtOrientation:(UIInterfaceOrientation)orientation {
     CGFloat height = 44;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone &&
-        UIInterfaceOrientationIsLandscape(orientation)) height = 32;
+        UIInterfaceOrientationIsLandscape(orientation)) height = 44;
     CGFloat adjust = 0;
     if (@available(iOS 11.0, *)) {
         //Account for possible notch
@@ -1696,7 +1714,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                                             @"com.apple.reminders.RemindersEditorExtension",
                                             ];
             self.activityViewController.excludedActivityTypes = excludedActivities;
-            
+            /*
             // Show loading spinner after a couple of seconds
             double delayInSeconds = 2.0;
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
@@ -1705,20 +1723,51 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                     [self showProgressHUDWithMessage:nil];
                 }
             });
-
+*/
             // Show
+            
             typeof(self) __weak weakSelf = self;
-            [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
-                [[UINavigationBar appearance] setBarTintColor:oldColor];
-                weakSelf.activityViewController = nil;
-                [weakSelf hideControlsAfterDelay];
-                [weakSelf hideProgressHUD:YES];
-            }];
-            // iOS 8 - Set the Anchor Point for the popover
-            if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8")) {
-                self.activityViewController.popoverPresentationController.barButtonItem = _actionButton;
+            
+            if (@available(iOS 13.0, *)){
+                [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
+                    if (activityType==UIActivityTypeSaveToCameraRoll&&completed){
+                        [[UINavigationBar appearance] setBarTintColor:oldColor];
+                        weakSelf.activityViewController = nil;
+                        [weakSelf hideControlsAfterDelay];
+                    }
+                    else{
+                        [weakSelf dismissViewControllerAnimated:NO completion:nil];
+                        [[UINavigationBar appearance] setBarTintColor:oldColor];
+                        weakSelf.activityViewController = nil;
+                        [weakSelf hideControlsAfterDelay];
+                    }
+                }];
             }
-            [self presentViewController:self.activityViewController animated:YES completion:nil];
+            else{
+                [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
+                    
+                        [weakSelf dismissViewControllerAnimated:NO completion:nil];
+                        [[UINavigationBar appearance] setBarTintColor:oldColor];
+                        weakSelf.activityViewController = nil;
+                        [weakSelf hideControlsAfterDelay];
+                    
+                }];
+            }
+            self.activityViewController.popoverPresentationController.barButtonItem = _actionButton;
+            
+            if (@available(iOS 13.0, *)){
+                UIViewController *fakeVC=[[UIViewController alloc] init];
+                
+                [self presentViewController:fakeVC animated:NO completion:^{
+                    [fakeVC presentViewController:self.activityViewController animated:YES completion:^{
+                        
+                    }];
+                }];
+            }
+            else{
+                [self presentViewController:self.activityViewController animated:YES completion:nil];
+            }
+            //[self presentViewController:self.activityViewController animated:YES completion:nil];
 
         }
         
