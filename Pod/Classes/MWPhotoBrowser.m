@@ -12,6 +12,8 @@
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
+#import "DismissAnimator.h"
+#import "DismissInteractor.h"
 @import LinkPresentation;
 
 #define PADDING                  10
@@ -93,6 +95,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     self.isStatusBarHidden=[UIApplication sharedApplication].statusBarHidden;
     
     [[UIApplication sharedApplication] setStatusBarHidden:YES];
+}
+
+- (id<UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
+    return [DismissAnimator new];
 }
 
 - (void)dealloc {
