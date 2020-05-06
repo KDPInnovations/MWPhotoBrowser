@@ -1784,7 +1784,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     if (!_progressHUD) {
         _progressHUD = [[MBProgressHUD alloc] initWithView:self.view];
         _progressHUD.minSize = CGSizeMake(120, 120);
-        _progressHUD.minShowTime = 1;
         [self.view addSubview:_progressHUD];
     }
     return _progressHUD;
