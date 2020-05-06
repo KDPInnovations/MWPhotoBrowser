@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name = 'MWPhotoBrowser'
-  s.version = '2.2.2-0.1.1'
+  s.version = '2.2.2-0.1.2'
   s.license = 'MIT'
   s.summary = 'This is an unoffical repo that forked from MWPhotoBrowser. Just update the dependency library version.'
   s.description = <<-DESCRIPTION
@@ -19,13 +19,12 @@ Pod::Spec.new do |s|
     'https://raw.github.com/mwaterfall/MWPhotoBrowser/master/Screenshots/MWPhotoBrowser6.png'
   ]
 
-  s.homepage = 'https://github.com/EvoIos/MWPhotoBrowser'
+  s.homepage = 'https://github.com/KDPInnovations/MWPhotoBrowser'
   s.author = { 'Michael Waterfall' => 'michaelwaterfall@gmail.com' }
-  s.social_media_url = 'https://twitter.com/mwaterfall'
 
   s.source = {
-    :git => 'https://github.com/EvoIos/MWPhotoBrowser.git',
-    :tag => '2.1.2-0.1.1'
+    :git => 'https://github.com/KDPInnovations/MWPhotoBrowser.git',
+    :tag => '2.2.2-0.1.2'
   }
   s.platform = :ios, '10.0'
   s.source_files = 'Pod/Classes/**/*'
@@ -39,7 +38,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'MBProgressHUD', '~> 1.2'
   s.dependency 'DACircularProgress', '~> 2.3.1'
-
+  s.dependency 'Masonry', 
   # SDWebImage
   s.dependency 'SDWebImage', '~> 4.0'
 
