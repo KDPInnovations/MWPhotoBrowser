@@ -12,8 +12,6 @@
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
-#import "DismissAnimator.h"
-#import "DismissInteractor.h"
 @import LinkPresentation;
 
 #define PADDING                  10
@@ -93,12 +91,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                                                object:nil];
     
     self.isStatusBarHidden=[UIApplication sharedApplication].statusBarHidden;
-    
-    [[UIApplication sharedApplication] setStatusBarHidden:YES];
-}
 
-- (id<UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
-    return [DismissAnimator new];
+    [[UIApplication sharedApplication] setStatusBarHidden:YES];
 }
 
 - (void)dealloc {
@@ -205,9 +199,9 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Swipe to dismiss
     if (_enableSwipeToDismiss) {
-        UISwipeGestureRecognizer *swipeGesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(doneButtonPressed:)];
-        swipeGesture.direction = UISwipeGestureRecognizerDirectionDown | UISwipeGestureRecognizerDirectionUp;
-        [self.view addGestureRecognizer:swipeGesture];
+        UIPanGestureRecognizer *scrollPan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanFromScrollView:)];
+        scrollPan.delegate = self;
+        [self.view addGestureRecognizer:scrollPan];
     }
     
 	// Super
@@ -461,7 +455,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     }
     
     // Controls
-    [self.navigationController.navigationBar.layer removeAllAnimations]; // Stop all animations on nav bar
+    //[self.navigationController.navigationBar.layer removeAllAnimations]; // Stop all animations on nav bar
     [NSObject cancelPreviousPerformRequestsWithTarget:self]; // Cancel any pending toggles from taps
     [self setControlsHidden:NO animated:NO permanent:YES];
     
@@ -1720,17 +1714,6 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                                             @"com.apple.reminders.RemindersEditorExtension",
                                             ];
             self.activityViewController.excludedActivityTypes = excludedActivities;
-            /*
-            // Show loading spinner after a couple of seconds
-            double delayInSeconds = 2.0;
-            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-            dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-                if (self.activityViewController) {
-                    [self showProgressHUDWithMessage:nil];
-                }
-            });
-*/
-            // Show
             
             typeof(self) __weak weakSelf = self;
             
@@ -1823,6 +1806,42 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 -(BOOL)shouldAutorotate
 {
+    return YES;
+}
+
+#pragma mark - UIPanGestureRecognizer target/action
+
+// Handle interactive dismissing of controller from scrollView
+- (void)handlePanFromScrollView:(UIPanGestureRecognizer *)recognizer {
+    
+    CGFloat translationY = [recognizer translationInView:self.view].y;
+    
+    UIGestureRecognizerState state = recognizer.state;
+    
+    CGFloat percentThreshold = 0.3f;
+    // converts the vertical distance to a percentage, based on the overall screen height
+    
+    CGFloat verticalMovement = abs(translationY) / self.view.frame.size.height;
+    // captures movement in the downward direction. Upward movement is ignored
+    CGFloat downwardMovement = fmaxf(verticalMovement, 0.f);
+    // caps the percentage to a maximum of 100%
+    CGFloat progress = fminf(downwardMovement, 1.f);
+    NSLog(@"Progress == %f",progress);
+    
+    switch (state) {
+        case UIGestureRecognizerStateChanged:
+            if (progress > percentThreshold){
+                [self doneButtonPressed:nil];
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES;
 }
 @end
