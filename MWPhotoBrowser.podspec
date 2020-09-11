@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name = 'MWPhotoBrowser'
-  s.version = '2.2.2-0.1.2'
+  s.version = '3.0.0'
   s.license = 'MIT'
   s.summary = 'This is an unoffical repo that forked from MWPhotoBrowser. Just update the dependency library version.'
   s.description = <<-DESCRIPTION
@@ -39,6 +39,6 @@ Pod::Spec.new do |s|
   s.dependency 'MBProgressHUD', '~> 1.2'
   s.dependency 'DACircularProgress', '~> 2.3.1'
   # SDWebImage
-  s.dependency 'SDWebImage', '~> 4.0'
+  s.dependency 'SDWebImage', '~> 5.0'
 
 end
