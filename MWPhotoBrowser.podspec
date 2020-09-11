@@ -24,9 +24,9 @@ Pod::Spec.new do |s|
 
   s.source = {
     :git => 'https://github.com/KDPInnovations/MWPhotoBrowser.git',
-    :tag => '2.2.2-0.1.2'
+    :tag => '3.0.0'
   }
-  s.platform = :ios, '10.0'
+  s.platform = :ios, '12.0'
   s.source_files = 'Pod/Classes/**/*'
   s.resource_bundles = {
     'MWPhotoBrowser' => ['Pod/Assets/*.png']
