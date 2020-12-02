@@ -34,7 +34,7 @@
 	// Navigation & controls
 	UIToolbar *_toolbar;
 	NSTimer *_controlVisibilityTimer;
-	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton, *_doneButton;
+	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton, *_doneButton, *_deleteButton;
     MBProgressHUD *_progressHUD;
     
     // Grid
@@ -63,6 +63,7 @@
     BOOL _isVCBasedStatusBarAppearance;
     BOOL _statusBarShouldBeHidden;
     BOOL _displayActionButton;
+    BOOL _displayDeleteButton;
     BOOL _leaveStatusBarAlone;
 	BOOL _performingLayout;
 	BOOL _rotating;

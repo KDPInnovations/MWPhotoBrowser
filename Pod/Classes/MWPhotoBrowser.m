@@ -67,6 +67,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _previousPageIndex = NSUIntegerMax;
     _currentVideoIndex = NSUIntegerMax;
     _displayActionButton = YES;
+    _displayDeleteButton = NO;
     _displayNavArrows = NO;
     _zoomPhotosToFill = YES;
     _performingLayout = NO; // Reset on view did appear
@@ -194,6 +195,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
     }
     
+    if (self.displayDeleteButton) {
+        _deleteButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(deleteButtonPressed:)];
+    }
+    
     // Update
     [self reloadData];
     
@@ -275,7 +280,11 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     if (_enableGrid) {
         hasItems = YES;
         [items addObject:[[UIBarButtonItem alloc] initWithImage:[UIImage imageForResourcePath:@"MWPhotoBrowser.bundle/UIBarButtonItemGrid" ofType:@"png" inBundle:[NSBundle bundleForClass:[self class]]] style:UIBarButtonItemStylePlain target:self action:@selector(showGridAnimated)]];
-    } else {
+    }
+    
+    if (_deleteButton) {
+        [items addObject:_deleteButton];
+    } else if (!_enableGrid) {
         [items addObject:fixedSpace];
     }
 
@@ -1679,6 +1688,19 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 #pragma mark - Actions
 
+- (void)deleteButtonPressed:(id)sender {
+    id <MWPhoto> photo = [self photoAtIndex:_currentPageIndex];
+    if ([self numberOfPhotos] > 0 && [photo underlyingImage]) {
+        
+        // If they have defined a delegate method then just message them
+        if ([self.delegate respondsToSelector:@selector(photoBrowser:deleteButtonPressedForPhotoAtIndex:)]) {
+            
+            // Let delegate handle things
+            [self.delegate photoBrowser:self deleteButtonPressedForPhotoAtIndex:_currentPageIndex];
+            
+        }
+    }
+}
 - (void)actionButtonPressed:(id)sender {
 
     // Only react when image has loaded
