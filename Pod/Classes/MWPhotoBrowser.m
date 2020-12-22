@@ -1064,7 +1064,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     CGFloat adjust = 0;
     if (@available(iOS 11.0, *)) {
         //Account for possible notch
-        UIEdgeInsets safeArea = [[UIApplication sharedApplication] keyWindow].safeAreaInsets;
+        //UIEdgeInsets safeArea = [[UIApplication sharedApplication] keyWindow].safeAreaInsets;
+        UIEdgeInsets safeArea = self.view.safeAreaInsets;
         adjust = safeArea.bottom;
     }
     return CGRectIntegral(CGRectMake(0, self.view.bounds.size.height - height - adjust, self.view.bounds.size.width, height));
@@ -1074,7 +1075,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     CGRect pageFrame = [self frameForPageAtIndex:index];
     CGSize captionSize = [captionView sizeThatFits:CGSizeMake(pageFrame.size.width, 0)];
     CGRect captionFrame = CGRectMake(pageFrame.origin.x,
-                                     pageFrame.size.height - captionSize.height - (_toolbar.superview?_toolbar.frame.size.height:0),
+                                     pageFrame.size.height - self.view.safeAreaInsets.bottom - captionSize.height - (_toolbar.superview?_toolbar.frame.size.height:0),
                                      pageFrame.size.width,
                                      captionSize.height);
     return CGRectIntegral(captionFrame);
