@@ -1743,6 +1743,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             if (@available(iOS 13.0, *)){
                 [self.activityViewController setCompletionHandler:^(NSString *activityType, BOOL completed) {
                     if (activityType==UIActivityTypeSaveToCameraRoll&&completed){
+                        [weakSelf dismissViewControllerAnimated:NO completion:nil];
                         [[UINavigationBar appearance] setBarTintColor:oldColor];
                         weakSelf.activityViewController = nil;
                         [weakSelf hideControlsAfterDelay];
